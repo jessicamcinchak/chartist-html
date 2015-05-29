@@ -4,6 +4,7 @@ describe('ChartistHtml', function() {
 	});
 });
 
+
 describe('ChartistHtml.config', function() {
 	it('has a config object', function() {
 		(!!ChartistHtml.config).should.equal(true);
@@ -49,48 +50,6 @@ describe('ChartistHtml', function() {
 		});
 	});
 
-	describe('innerHtmlToJson', function() {
-		describe('for bar charts', function() {
-			var html = '<div class="ct-html" data-title="A Fine Chart" data-type="bar" data-options="stacked|horizontal"><ul><li class="ct-html__labels">May|June|July|August|September</li><li class="ct-html__series" data-name="Federal">1|2|3|4|5</li><li class="ct-html__series" data-name="State">1|2|3|4|5</li><li class="ct-html__series" data-name="Local">1|2|3|4|5</li></ul></div>';
-			beforeEach(function() {
-				ChartistHtml.config.baseClass = 'ct-html';
-			});
-			it('detects and separates chart labels', function() {
-				(ChartistHtml.innerHtmlToJson(html, 'bar').labels[0]).should.equal('May');
-			});
-			it('detects and separates chart series - array of array', function() {
-				(ChartistHtml.innerHtmlToJson(html, 'bar').series[0][0]).should.equal(1);
-			});
-		});
-		
-		describe('for pie charts', function() {
-			var html = '<div class="cts" data-type="pie"><ul><li class="cts__series" data-name="Federal">25</li><li class="cts__series" data-name="State">50</li><li class="cts__series" data-name="Local">25</li></ul></div>';
-			beforeEach(function() {
-				ChartistHtml.config.baseClass = 'cts';
-			});
-			it('detects and separates chart labels', function() {
-				(ChartistHtml.innerHtmlToJson(html, 'pie').labels[0]).should.equal('Federal');
-			});
-			it('detects and separates chart series - simple array', function() {
-				(ChartistHtml.innerHtmlToJson(html, 'pie').series[0]).should.equal(25);
-			});
-		});
-
-		describe('integration', function() {	
-		});
-	});
-
-	describe('elementToJson', function() {
-		var html = '<div class="cts" data-type="pie"><ul><li class="cts__series" data-name="Federal">25</li><li class="cts__series" data-name="State">50</li><li class="cts__series" data-name="Local">25</li></ul></div>',
-		    $el = $(html);
-		beforeEach(function() {
-				ChartistHtml.config.baseClass = 'cts';
-		});
-		it('detects chart type', function() {
-			(ChartistHtml.elementToJson($el)).type.should.equal('pie');
-		});
-	});
-
 	describe('toSentenceCase', function() {
 		it('converts to sentence case', function() {
 			(ChartistHtml.toSentenceCase('apples')).should.equal('Apples');
@@ -123,7 +82,35 @@ describe('ChartistHtml.getOptions', function() {
 		(ChartistHtml.getOptions( 'bar', [ 'stacked' ], chartOptions)).should.equal({'a': "b", 'c': "d"});
 	});
 });
- describe('ChartistHtml.ChartManager', function() {
+describe('ChartistHtml.ChartManager', function() {
+
+	describe('isFillChart', function() {
+		describe('for bar charts - not fill charts', function () {
+			var html = '<div class="ct-html" data-title="A Fine Chart" data-type="bar" data-options="stacked|horizontal"><ul><li class="ct-html__labels">May|June|July|August|September</li><li class="ct-html__series" data-name="Federal">1|2|3|4|5</li><li class="ct-html__series" data-name="State">1|2|3|4|5</li><li class="ct-html__series" data-name="Local">1|2|3|4|5</li></ul></div>',
+				chart;
+			beforeEach(function() {
+				ChartistHtml.config.baseClass = 'ct-html';
+				chart = new ChartistHtml.ChartManager($(html), 1);
+			});
+			it('detects chart type and assigns fill or stroke', function() {
+				(chart.isFillChart(html, 'bar')).should.equal(false);
+			});
+		});
+	});
+
+	describe('isStrokeChart', function() {
+		describe('for bar charts - stroke charts', function () {
+			var html = '<div class="ct-html" data-title="A Fine Chart" data-type="bar" data-options="stacked|horizontal"><ul><li class="ct-html__labels">May|June|July|August|September</li><li class="ct-html__series" data-name="Federal">1|2|3|4|5</li><li class="ct-html__series" data-name="State">1|2|3|4|5</li><li class="ct-html__series" data-name="Local">1|2|3|4|5</li></ul></div>',
+				chart;
+			beforeEach(function() {
+				ChartistHtml.config.baseClass = 'ct-html';
+				chart = new ChartistHtml.ChartManager($(html), 1);
+			});
+			it('detects chart type and assigns fill or stroke', function() {
+				(chart.isStrokeChart(html, 'bar')).should.equal(true);
+			});
+		});
+	});
 
 	describe('innerHtmlToJson', function() {
 		describe('for bar charts', function() {
@@ -140,17 +127,47 @@ describe('ChartistHtml.getOptions', function() {
 				(chart.innerHtmlToJson(html, 'bar').series[0][0]).should.equal(1);
 			});
 		});
-	});
 
-	describe('getJson', function() {
-		var html = '<div class="cts" data-type="pie"><ul><li class="cts__series" data-name="Federal">25</li><li class="cts__series" data-name="State">50</li><li class="cts__series" data-name="Local">25</li></ul></div>',
-			chart;
-		beforeEach(function() {
+		describe('for pie charts', function() {
+			var html = '<div class="cts" data-type="pie"><ul><li class="cts__series" data-name="Federal">25</li><li class="cts__series" data-name="State">50</li><li class="cts__series" data-name="Local">25</li></ul></div>',
+				chart;
+			beforeEach(function() {
 				ChartistHtml.config.baseClass = 'cts';
 				chart = new ChartistHtml.ChartManager($(html), 1);
+			});
+			it('detects and separates chart labels', function() {
+				(chart.innerHtmlToJson(html, 'pie').labels[0]).should.equal('Federal');
+			});
+			it('detects and separates chart series - simple array', function() {
+				(chart.innerHtmlToJson(html, 'pie').series[0]).should.equal(25);
+			});
+		});
+	});
+
+	describe('setData', function() {
+		var html = '<div class="cts" data-type="pie" data-title="This is a title"><ul><li class="cts__series" data-name="Federal">25</li><li class="cts__series" data-name="State">50</li><li class="cts__series" data-name="Local">25</li></ul></div>',
+			chart;
+		beforeEach(function() {
+			ChartistHtml.config.baseClass = 'cts';
+			chart = new ChartistHtml.ChartManager($(html), 1);
+		});
+		it('detects chart title', function() {
+			(chart.setData(html).title).should.equal('This is a title');
 		});
 		it('detects chart type', function() {
-			(chart.getJson(html).type).should.equal('pie');
+			(chart.setData(html).type).should.equal('pie');
+		});
+	});
+
+	describe('render', function() {
+		var html = '<div class="cts" data-type="pie" data-title="This is a title"><ul><li class="cts__series" data-name="Federal">25</li><li class="cts__series" data-name="State">50</li><li class="cts__series" data-name="Local">25</li></ul></div>',
+			chart;
+		beforeEach(function() {
+			ChartistHtml.config.baseClass = 'cts';
+			chart = new ChartistHtml.ChartManager($(html), 1);
+		});
+		it('detects and capitalizes chart type', function() {
+			(chart.render(html).type).should.equal('Pie');
 		});
 	});
 

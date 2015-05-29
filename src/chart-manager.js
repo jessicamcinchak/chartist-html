@@ -41,7 +41,6 @@ ChartistHtml.ChartManager.prototype = {
 	},
 
 	/*
-	 * Extracts chart content from the inner html
 	 * Extracts chart content from the inner html (unordered list).
 	 * @returns {object}
 	 */
@@ -181,7 +180,7 @@ ChartistHtml.ChartManager.prototype = {
 			}
 			self._addColoring();
 		});
-
+		console.log(this);
 		return this;
 	},
 
@@ -254,7 +253,7 @@ ChartistHtml.ChartManager.prototype = {
 
 	/*
 	* Finds longest label in array 
-	* Used to adjust axis offset for labels not set by formatters
+	* Adjusts axis offset space for long labels not set by formatters (in getOptions method)
 	* @returns {number} - length of string
 	*/
 	_getLongestLabelLength: function (v) {
